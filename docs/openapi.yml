@@ -1,0 +1,244 @@
+openapi: '3.0.2'
+info:
+  version: 1.0.0
+  title: Delivery Much backend challenge
+  description: Serviço para criação de pedidos e consulta de produtos
+  contact:
+    name: API Support
+    email: 'dnrevaldt@gmail.com'
+
+servers:
+  - description: Desenvolvimento
+    url: http://localhost:3000
+
+tags:
+  - name: Products
+    description: >
+      Ações relacionadas aos produtos
+
+  - name: Orders
+    description: >
+      Ações relacionadas a pedidos
+
+paths:
+  /products/:name:
+    get:
+      tags:
+        - Products
+      summary: Buscar produto pelo seu nome
+      parameters:
+        - name: name
+          description: Nome do produto desejado
+          schema:
+            type: string
+          in: path
+          required: true
+      responses:
+          200:
+            description: Dados do produto
+            content:
+              application/json:
+                schema:
+                  properties:
+                    id:
+                      $ref: '#/components/schemas/Id'
+                    name:
+                      $ref: '#/components/schemas/Name'
+                    quantity:
+                      type: number
+                      description: Quantidade do produto em estoque
+                      example: 10
+                    price:
+                      $ref: '#/components/schemas/Price'
+          404:
+            $ref: '#/components/responses/NotFound'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+
+  /orders:
+    post:
+      tags:
+        - Orders
+      summary: Criar um pedido
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - products
+              properties:
+                products:
+                  type: array
+                  minimum: 1
+                  items:
+                    type: object
+                    description: Produto
+                    required:
+                      - name
+                      - quantity
+                    properties:
+                      name:
+                        $ref: '#/components/schemas/Name'
+                      quantity:
+                        $ref: '#/components/schemas/Quantity'
+
+      responses:
+        200:
+          description: Dados do pedido
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
+                  name:
+                    $ref: '#/components/schemas/Name'
+                  quantity:
+                    $ref: '#/components/schemas/Quantity'
+                  price:
+                    $ref: '#/components/schemas/Price'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Orders
+      summary: Listar pedidos realizados
+      responses:
+        200:
+          description: Dados do pedido
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Itens do pedido
+                items:
+                  $ref: '#/components/schemas/Order'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /orders/:id:
+    get:
+      tags:
+        - Orders
+      summary: Buscar um pedido realizado pelo seu identificador
+      parameters:
+        - name: id
+          description: Identificador do pedido desejado
+          schema:
+            type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: Dados do pedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Id:
+      type: number
+      description: Identificador do produto
+      example: 100
+
+    Name:
+      type: string
+      description: Nome do produto
+      example: 'Coffee'
+
+    Quantity:
+      type: number
+      description: Quantidade do produto
+      example: 10
+
+    Price:
+      type: number
+      description: Preço do produto
+      example: 10.62
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Identificador do pedido
+          example: 1
+        products:
+          type: object
+          description: Produtos do pedido
+          properties:
+            name:
+              $ref: '#/components/schemas/Name'
+            quantity:
+              $ref: '#/components/schemas/Quantity'
+            price:
+              $ref: '#/components/schemas/Price'
+        total:
+          type: number
+          description: Total do pedido
+          example: 106.20
+
+
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        'application/json':
+          schema:
+            properties:
+              code:
+                description: Código do erro
+                type: string
+                example: 'BAD_REQUEST'
+              message:
+                description: Mensagem de erro
+                type: string
+                example: 'Invalid request params.'
+              details:
+                description: Detalhes do erro
+                type: array
+                example:
+                  - message: '"body.products[0].name" is not allowed to be empty'
+
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        'application/json':
+          schema:
+            properties:
+              code:
+                description: Código do erro
+                type: string
+                example: NOT_FOUND
+              message:
+                description: Mensagem de erro
+                type: string
+                example: 'Resource not found.'
+
+    InternalServerError:
+      description: Erro interno do servidor
+      content:
+        'application/json':
+          schema:
+            properties:
+              code:
+                description: Código do erro
+                type: string
+                example: 'INTERNAL_SERVER_ERROR'
+              message:
+                description: Mensagem de erro
+                type: string
+                example: 'Unexpected error occurred.'

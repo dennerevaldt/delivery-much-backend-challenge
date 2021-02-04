@@ -1,0 +1,65 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:5.7
+    networks:
+      - app-network
+    restart: always
+    environment:
+      MYSQL_DATABASE: dm-backend
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    networks:
+      - app-network
+    ports:
+      - 5672:5672
+      - 15672:15672
+  stock-service:
+    image: deliverymuch/backend-challenge:stock-service
+    networks:
+      - app-network
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+    restart: on-failure
+  app:
+    build: .
+    command: npm start
+    ports:
+      - 3000:3000
+    networks:
+      - app-network
+    restart: on-failure
+    depends_on:
+      - stock-service
+      - db
+      - rabbitmq
+    environment:
+      HTTP_ACTIVE: 'true'
+      HTTP_PORT: 3000
+      AMQP_ACTIVE: 'true'
+      AMQP_PROTOCOL: amqp
+      AMQP_HOSTNAME: rabbitmq
+      AMQP_USERNAME: guest
+      AMQP_PASSWORD: guest
+      AMQP_VHOST: /
+      MYSQL_HOST: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_SCHEMA: dm-backend
+    links:
+      - db
+      - rabbitmq
+networks:
+  app-network:
+    driver: bridge

@@ -1,0 +1,11 @@
+test
+.vscode
+docs
+node_modules
+
+.editorconfig
+.env.sample
+.eslintrc.json
+.gitignore
+nodemon.json
+README.md
