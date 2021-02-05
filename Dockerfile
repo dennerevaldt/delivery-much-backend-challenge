@@ -10,6 +10,6 @@ RUN npm install
 
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE ${HTTP_PORT}
 
 CMD npm start

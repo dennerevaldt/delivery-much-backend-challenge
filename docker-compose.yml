@@ -6,10 +6,10 @@ services:
       - app-network
     restart: always
     environment:
-      MYSQL_DATABASE: dm-backend
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ${MYSQL_SCHEMA}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - 3306:3306
     expose:
@@ -44,19 +44,8 @@ services:
       - stock-service
       - db
       - rabbitmq
-    environment:
-      HTTP_ACTIVE: 'true'
-      HTTP_PORT: 3000
-      AMQP_ACTIVE: 'true'
-      AMQP_PROTOCOL: amqp
-      AMQP_HOSTNAME: rabbitmq
-      AMQP_USERNAME: guest
-      AMQP_PASSWORD: guest
-      AMQP_VHOST: /
-      MYSQL_HOST: db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_SCHEMA: dm-backend
+    env_file:
+      - .env
     links:
       - db
       - rabbitmq
