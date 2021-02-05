@@ -4,7 +4,7 @@ export enum StockEventType {
 };
 
 export type Product = {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   price: number;

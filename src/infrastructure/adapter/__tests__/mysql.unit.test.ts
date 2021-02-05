@@ -19,9 +19,6 @@ describe('mysql adapter', () => {
 
     t.tableName = 'testTable';
 
-    // @ts-ignore
-    expect(t._tbName).toBe('testTable');
-
     const x = t.db;
     // @ts-ignore
     expect(dbConn.mock.calls).toEqual([['testTable']]);
